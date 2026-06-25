@@ -15,7 +15,8 @@ import {
   getPortfolioFromFirebase,
   savePortfolioToFirebase,
   checkAdminPassword,
-  uploadFileToFirebase
+  uploadFileToFirebase,
+  updateAdminPasswordInFirebase
 } from "./lib/firebase";
 
 export default function App() {
@@ -375,6 +376,7 @@ export default function App() {
           onLogin={handleLogin}
           onLogout={handleLogout}
           onUploadFile={uploadFileToFirebase}
+          onChangePassword={updateAdminPasswordInFirebase}
         />
       )}
 

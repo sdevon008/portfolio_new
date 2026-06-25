@@ -23,6 +23,7 @@ interface AdminPanelProps {
   onLogin: (password: string) => Promise<boolean>;
   onLogout: () => void;
   onUploadFile?: (file: File | Blob, fileName: string, fileType: string) => Promise<{ url: string; sizeStr: string }>;
+  onChangePassword?: (newPassword: string) => Promise<boolean>;
 }
 
 export default function AdminPanel({
@@ -32,12 +33,19 @@ export default function AdminPanel({
   isAdminLoggedIn,
   onLogin,
   onLogout,
-  onUploadFile
+  onUploadFile,
+  onChangePassword
 }: AdminPanelProps) {
   // Authentication states
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const [isSubmittingLogin, setIsSubmittingLogin] = useState(false);
+
+  // Password change states
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordChangeStatus, setPasswordChangeStatus] = useState<{ type: "success" | "error" | null; message: string }>({ type: null, message: "" });
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   // Form states (cloned from original portfolio data)
   const [formData, setFormData] = useState<PortfolioData>({ ...portfolio });
@@ -65,6 +73,44 @@ export default function AdminPanel({
       setFormData({ ...portfolio });
     } else {
       setLoginError("Invalid password. Please try again.");
+    }
+  };
+
+  // Handle Changing Admin Password
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPassword) {
+      setPasswordChangeStatus({ type: "error", message: "Password cannot be empty" });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordChangeStatus({ type: "error", message: "Passwords do not match" });
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPasswordChangeStatus({ type: "error", message: "Password must be at least 6 characters long" });
+      return;
+    }
+
+    try {
+      setIsChangingPassword(true);
+      setPasswordChangeStatus({ type: null, message: "" });
+      if (onChangePassword) {
+        const success = await onChangePassword(newPassword);
+        if (success) {
+          setPasswordChangeStatus({ type: "success", message: "Password updated successfully!" });
+          setNewPassword("");
+          setConfirmPassword("");
+        } else {
+          setPasswordChangeStatus({ type: "error", message: "Failed to update password. Try again." });
+        }
+      } else {
+        setPasswordChangeStatus({ type: "error", message: "Password update is not available in local mode." });
+      }
+    } catch (err) {
+      setPasswordChangeStatus({ type: "error", message: "An error occurred while updating the password." });
+    } finally {
+      setIsChangingPassword(false);
     }
   };
 
@@ -683,6 +729,74 @@ export default function AdminPanel({
                           className="w-full rounded-lg border border-slate-200 p-2 text-sm text-slate-900"
                         />
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Security Panel */}
+                  <div className="border-t border-slate-100 pt-4 mt-4">
+                    <h4 className="font-mono text-[10px] uppercase tracking-wider text-teal-600 font-bold mb-3 flex items-center space-x-1">
+                      <Lock className="h-3 w-3" />
+                      <span>Security & Admin Credentials</span>
+                    </h4>
+                    <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-150">
+                      <p className="text-xs text-slate-500 mb-3">
+                        Change the current login credentials. Your password is stored safely in Firestore.
+                      </p>
+                      
+                      <div className="grid gap-4 sm:grid-cols-2 mb-3">
+                        <div>
+                          <label className="block text-xs font-bold uppercase text-slate-500 mb-1">New Password</label>
+                          <input
+                            type="password"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            placeholder="At least 6 characters"
+                            className="w-full rounded-lg border border-slate-200 p-2 text-sm text-slate-900"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Confirm New Password</label>
+                          <input
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            placeholder="Re-enter password"
+                            className="w-full rounded-lg border border-slate-200 p-2 text-sm text-slate-900"
+                          />
+                        </div>
+                      </div>
+
+                      {passwordChangeStatus.message && (
+                        <div className={`text-xs p-2.5 rounded-lg mb-3 flex items-center space-x-1.5 ${
+                          passwordChangeStatus.type === "success" 
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-150" 
+                            : "bg-rose-50 text-rose-700 border border-rose-150"
+                        }`}>
+                          <span className="font-semibold">
+                            {passwordChangeStatus.type === "success" ? "✓" : "⚠"}
+                          </span>
+                          <span>{passwordChangeStatus.message}</span>
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={handlePasswordChange}
+                        disabled={isChangingPassword}
+                        className="inline-flex items-center space-x-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 px-4 py-2 rounded-lg transition"
+                      >
+                        {isChangingPassword ? (
+                          <>
+                            <div className="h-3 w-3 animate-spin rounded-full border-2 border-slate-400 border-t-white"></div>
+                            <span>Updating...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Lock className="h-3.5 w-3.5" />
+                            <span>Update Password</span>
+                          </>
+                        )}
+                      </button>
                     </div>
                   </div>
                 </div>

@@ -1,0 +1,38 @@
+{
+  "entities": {
+    "PortfolioData": {
+      "title": "PortfolioData",
+      "description": "Comprehensive portfolio details including experience, certificates, bio, and technical expertise.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "title": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "location": { "type": "string" },
+        "summary": { "type": "string" },
+        "profilePic": { "type": "string" }
+      },
+      "required": ["name", "title", "email", "phone", "location", "summary", "profilePic"]
+    },
+    "AdminConfig": {
+      "title": "AdminConfig",
+      "description": "Configuration object containing system admin parameters.",
+      "type": "object",
+      "properties": {
+        "password": { "type": "string" }
+      },
+      "required": ["password"]
+    }
+  },
+  "firestore": {
+    "portfolio/{portfolioId}": {
+      "schema": "PortfolioData",
+      "description": "User portfolio documents for display and management."
+    },
+    "admin/config": {
+      "schema": "AdminConfig",
+      "description": "System admin credentials and keys."
+    }
+  }
+}

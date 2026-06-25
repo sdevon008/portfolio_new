@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --color-brand-primary: #8b5cf6;
+  --color-brand-accent: #a78bfa;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #080a11;
+  color: #f1f5f9;
+}
+
+/* Custom background ambient glows similar to the design image */
+.radial-glow {
+  background: radial-gradient(circle at center, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0) 70%);
+}
+
+.radial-glow-subtle {
+  background: radial-gradient(circle at center, rgba(167, 139, 250, 0.08) 0%, rgba(167, 139, 250, 0) 60%);
+}
+
